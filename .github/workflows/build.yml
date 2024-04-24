@@ -189,13 +189,14 @@ jobs:
         unzip ../cosmocc-3.3.3.zip
         sudo cp ./bin/ape-x86_64.elf /usr/bin/ape
         sudo sh -c "echo ':APE:M::MZqFpD::/usr/bin/ape:' >/proc/sys/fs/binfmt_misc/register"
-    - run: mkdir output
+    - run: mkdir results
     - name: build x86_64
       run: |
         mkdir build
         cd build
         cmake -DENABLE_SHARED_LIB=OFF -DENABLE_STATIC_LIB=ON -DCMAKE_LINKER="/sc/cosmo/bin/x86_64-unknown-cosmo-cc" -DCMAKE_C_COMPILER="/sc/cosmo/bin/x86_64-unknown-cosmo-cc" -DCMAKE_CXX_COMPILER="/sc/cosmo/bin/x86_64-unknown-cosmo-c++" ..
         cmake --build .
+        ls -alh
         cmake --build . --target check
         cp main ../results/nghttp3_main.x86_64
         cp qpack ../results/nghttp3_qpack.x86_64
