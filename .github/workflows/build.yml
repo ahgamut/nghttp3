@@ -168,6 +168,37 @@ jobs:
         cmake --build build
         cmake --build build --target check
 
+  build-cosmo:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - run: |
+        sudo apt update
+        sudo apt-get install cmake cmake-data ninja-build
+    - name: install cosmocc
+      run: |
+        sudo mkdir -p /sc
+        sudo chmod -R 0777 /sc 
+        cd /sc
+        wget https://github.com/jart/cosmopolitan/releases/download/3.3.3/cosmocc-3.3.3.zip
+        mkdir cosmo
+        cd cosmo
+        unzip ../cosmocc-3.3.3.zip
+        sudo cp ./bin/ape-x86_64.elf /usr/bin/ape
+        sudo sh -c "echo ':APE:M::MZqFpD::/usr/bin/ape:' >/proc/sys/fs/binfmt_misc/register"
+    - name: Configure cmake
+      run: |
+        git submodule update --init --depth 1
+        mkdir build
+        cd build
+        cmake -DENABLE_SHARED_LIB=OFF -DENABLE_STATIC_LIB=ON -DCMAKE_C_COMPILER="/sc/cosmo/bin/cosmocc" ..
+    - name: Build nghttp3
+      run: |
+        cmake --build build
+        cmake --build build --target check
+
+
   release:
     if: github.ref_type == 'tag'
 
@@ -175,6 +206,7 @@ jobs:
     - build
     - build-cross
     - build-windows
+    - build-cosmo
 
     permissions:
       contents: write
