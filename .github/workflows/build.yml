@@ -192,7 +192,7 @@ jobs:
         git submodule update --init --depth 1
         mkdir build
         cd build
-        cmake -DENABLE_SHARED_LIB=OFF -DENABLE_STATIC_LIB=ON -DCMAKE_LINKER="/sc/cosmo/bin/cosmocc" -DCMAKE_C_COMPILER="/sc/cosmo/bin/cosmocc" ..
+        cmake -DENABLE_SHARED_LIB=OFF -DENABLE_STATIC_LIB=ON -DCMAKE_LINKER="/sc/cosmo/bin/cosmocc" -DCMAKE_C_COMPILER="/sc/cosmo/bin/cosmocc" -DCMAKE_CXX_COMPILER="/sc/cosmo/bin/cosmoc++" ..
     - name: Build nghttp3
       run: |
         cmake --build build
