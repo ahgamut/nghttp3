@@ -197,8 +197,9 @@ jobs:
         cmake -DENABLE_SHARED_LIB=OFF -DENABLE_STATIC_LIB=ON -DCMAKE_LINKER="/sc/cosmo/bin/x86_64-unknown-cosmo-cc" -DCMAKE_C_COMPILER="/sc/cosmo/bin/x86_64-unknown-cosmo-cc" -DCMAKE_CXX_COMPILER="/sc/cosmo/bin/x86_64-unknown-cosmo-c++" ..
         cmake --build .
         cmake --build . --target check
-        ls -alh bin/*
-        cp bin/* ../results
+        cp main ../results/nghttp3_main.x86_64
+        cp qpack ../results/nghttp3_qpack.x86_64
+        cp nghttp3_static ../results/nghttp3_static.x86_64
         cd ..
         rm -rf build
     - name: build aarch64
@@ -208,10 +209,19 @@ jobs:
         cmake -DENABLE_SHARED_LIB=OFF -DENABLE_STATIC_LIB=ON -DCMAKE_LINKER="/sc/cosmo/bin/aarch64-unknown-cosmo-cc" -DCMAKE_C_COMPILER="/sc/cosmo/bin/aarch64-unknown-cosmo-cc" -DCMAKE_CXX_COMPILER="/sc/cosmo/bin/aarch64-unknown-cosmo-c++" ..
         cmake --build .
         cmake --build . --target check
-        ls -alh bin/*
-        cp bin/* ../results
+        cp main ../results/nghttp3_main.aarch64
+        cp qpack ../results/nghttp3_qpack.aarch64
+        cp nghttp3_static ../results/nghttp3_static.aarch64
         cd ..
         rm -rf build
+    - name: build APE binaries
+      run: |
+        cd results
+        /sc/cosmo/bin/apelink -l /sc/cosmo/bin/ape-x86_64.elf -l /sc/cosmo/bin/ape-aarch64.elf -M /sc/cosmo/bin/ape-m1.c -o nghttp3_main nghttp3_main.x86_64 nghttp3_main.aarch64
+        /sc/cosmo/bin/apelink -l /sc/cosmo/bin/ape-x86_64.elf -l /sc/cosmo/bin/ape-aarch64.elf -M /sc/cosmo/bin/ape-m1.c -o nghttp3_static nghttp3_static.x86_64 nghttp3_static.aarch64
+        /sc/cosmo/bin/apelink -l /sc/cosmo/bin/ape-x86_64.elf -l /sc/cosmo/bin/ape-aarch64.elf -M /sc/cosmo/bin/ape-m1.c -o nghttp3_qpack nghttp3_qpack.x86_64 nghttp3_qpack.aarch64
+        zip nghttp-cosmo.zip nghttp3_main nghttp3_qpack nghttp3_static
+        ls -alh
 
   release:
     if: github.ref_type == 'tag'
