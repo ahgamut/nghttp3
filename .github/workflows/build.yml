@@ -175,7 +175,9 @@ jobs:
     - uses: actions/checkout@v4
     - run: |
         sudo apt update
-        sudo apt-get install cmake cmake-data ninja-build
+        sudo apt-get install cmake cmake-data ninja-build qemu qemu-utils qemu-user-static
+    - run: |
+        git submodule update --init --depth 1
     - name: install cosmocc
       run: |
         sudo mkdir -p /sc
@@ -187,17 +189,29 @@ jobs:
         unzip ../cosmocc-3.3.3.zip
         sudo cp ./bin/ape-x86_64.elf /usr/bin/ape
         sudo sh -c "echo ':APE:M::MZqFpD::/usr/bin/ape:' >/proc/sys/fs/binfmt_misc/register"
-    - name: Configure cmake
+    - run: mkdir output
+    - name: build x86_64
       run: |
-        git submodule update --init --depth 1
         mkdir build
         cd build
-        cmake -DENABLE_SHARED_LIB=OFF -DENABLE_STATIC_LIB=ON -DCMAKE_LINKER="/sc/cosmo/bin/cosmocc" -DCMAKE_C_COMPILER="/sc/cosmo/bin/cosmocc" -DCMAKE_CXX_COMPILER="/sc/cosmo/bin/cosmoc++" ..
-    - name: Build nghttp3
+        cmake -DENABLE_SHARED_LIB=OFF -DENABLE_STATIC_LIB=ON -DCMAKE_LINKER="/sc/cosmo/bin/x86_64-unknown-cosmo-cc" -DCMAKE_C_COMPILER="/sc/cosmo/bin/x86_64-unknown-cosmo-cc" -DCMAKE_CXX_COMPILER="/sc/cosmo/bin/x86_64-unknown-cosmo-c++" ..
+        cmake --build .
+        cmake --build . --target check
+        ls -alh bin/*
+        cp bin/* ../results
+        cd ..
+        rm -rf build
+    - name: build aarch64
       run: |
-        cmake --build build
-        cmake --build build --target check
-
+        mkdir build
+        cd build
+        cmake -DENABLE_SHARED_LIB=OFF -DENABLE_STATIC_LIB=ON -DCMAKE_LINKER="/sc/cosmo/bin/aarch64-unknown-cosmo-cc" -DCMAKE_C_COMPILER="/sc/cosmo/bin/aarch64-unknown-cosmo-cc" -DCMAKE_CXX_COMPILER="/sc/cosmo/bin/aarch64-unknown-cosmo-c++" ..
+        cmake --build .
+        cmake --build . --target check
+        ls -alh bin/*
+        cp bin/* ../results
+        cd ..
+        rm -rf build
 
   release:
     if: github.ref_type == 'tag'
